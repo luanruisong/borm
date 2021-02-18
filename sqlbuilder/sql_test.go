@@ -44,3 +44,41 @@ func TestSelect(t *testing.T) {
 	t.Log(sql.Sql())
 	t.Log(sql.Args())
 }
+
+func TestAutoInsert(t *testing.T) {
+	s := struct {
+		AaaAa string `db:"a"`
+		BbbBb int
+		CccCc float64
+	}{}
+
+	type TestTable struct {
+		AaaAa string `db:"a"`
+		BbbBb int
+		CccCc float64
+		asda  bool
+	}
+
+	s1 := TestTable{}
+	s2 := TestTable{
+		AaaAa: "asdasdasdasdas",
+		BbbBb: 200,
+		CccCc: 3.14,
+		asda:  true,
+	}
+
+	autoInsert(t, s)
+	autoInsert(t, s1)
+	autoInsert(t, s2)
+
+}
+
+func autoInsert(t *testing.T, s interface{}) {
+	sql, err := AutoInsert(s)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	} else {
+		t.Log(sql.Sql(), sql.Args())
+	}
+}
