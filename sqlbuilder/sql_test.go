@@ -82,3 +82,26 @@ func autoInsert(t *testing.T, s interface{}) {
 		t.Log(sql.Sql(), sql.Args())
 	}
 }
+
+func TestAutoUpdate(t *testing.T) {
+	type TestTable struct {
+		AaaAa string `db:"a"`
+		BbbBb int
+		CccCc float64
+		asda  bool
+		Id    string `pk:"1"`
+	}
+	s := TestTable{
+		AaaAa: "asdasdasdasdas",
+		BbbBb: 200,
+		CccCc: 3.14,
+		asda:  true,
+	}
+	sql, err := AutoUpdate(s)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	} else {
+		t.Log(sql.Sql(), sql.Args())
+	}
+}

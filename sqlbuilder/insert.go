@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/luanruisong/borm/reflectx"
-	"github.com/luanruisong/borm/stringx"
 )
 
 type (
@@ -65,13 +64,7 @@ func InsertInto(tableName string) SqlBuilder {
 //自动插入结构体
 func AutoInsert(i interface{}) (SqlBuilder, error) {
 	//处理tableName 如果实现了table接口，按照接口
-	var tName string
-	if t, ok := i.(Table); ok {
-		tName = t.TableName()
-	} else {
-		//未实现接口，取struct名称的蛇形
-		tName = stringx.SnakeName(reflectx.StructName(i))
-	}
+	tName := TableName(i)
 	//如果是匿名struct，无table 返回找不到tableName
 	if len(tName) == 0 {
 		return nil, errors.New("can not find table name")
@@ -84,11 +77,7 @@ func AutoInsert(i interface{}) (SqlBuilder, error) {
 	//错误可直接忽略（因为没有产生错误的地方）
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
 		//获取tag，也就是自定义的column
-		column := t.Tag.Get("db")
-		if len(column) == 0 {
-			//入无自定义column，取field名称的蛇形
-			column = stringx.SnakeName(t.Name)
-		}
+		column := ColumnName(t)
 		// "-" 表示忽略，空数据 也直接跳过
 		if column == "-" || reflectx.IsNull(v) {
 			return nil
