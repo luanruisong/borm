@@ -20,15 +20,7 @@ type (
 	}
 )
 
-func (is *insertBuilder) Select(s ...string) SqlBuilder {
-	panic("implement me")
-}
-
-func (is *insertBuilder) Where(sql string, value ...interface{}) SqlBuilder {
-	panic("implement me")
-}
-
-func (is *insertBuilder) Set(k string, v interface{}) SqlBuilder {
+func (is *insertBuilder) Set(k string, v interface{}) InsertBuilder {
 	is.Do(func() {
 		is.set = make(map[string]interface{})
 	})
@@ -36,7 +28,7 @@ func (is *insertBuilder) Set(k string, v interface{}) SqlBuilder {
 	return is
 }
 
-func (is *insertBuilder) From(tableName string) SqlBuilder {
+func (is *insertBuilder) From(tableName string) InsertBuilder {
 	is.tableName = tableName
 	return is
 }
@@ -57,12 +49,12 @@ func (is *insertBuilder) Args() []interface{} {
 	return is.args
 }
 
-func InsertInto(tableName string) SqlBuilder {
+func InsertInto(tableName string) InsertBuilder {
 	return new(insertBuilder).From(tableName)
 }
 
 //自动插入结构体
-func AutoInsert(i interface{}) (SqlBuilder, error) {
+func AutoInsert(i interface{}) (InsertBuilder, error) {
 	//处理tableName 如果实现了table接口，按照接口
 	tName := TableName(i)
 	//如果是匿名struct，无table 返回找不到tableName

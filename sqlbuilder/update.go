@@ -16,23 +16,27 @@ type (
 		tableName string
 		set       map[string]interface{}
 		setValues string
-		whereSql  string
-		whereArgs []interface{}
 		args      []interface{}
+		where     whereBuilder
 	}
 )
 
-func (is *updateBuilder) Select(s ...string) SqlBuilder {
-	panic("implement me")
+func (w *updateBuilder) And(sql string, value ...interface{}) UpdateBuilder {
+	w.where.And(sql, value)
+	return w
 }
 
-func (is *updateBuilder) Where(sql string, value ...interface{}) SqlBuilder {
-	is.whereSql = sql
-	is.whereArgs = value
-	return is
+func (w *updateBuilder) Or(sql string, value ...interface{}) UpdateBuilder {
+	w.where.Or(sql, value)
+	return w
 }
 
-func (is *updateBuilder) Set(k string, v interface{}) SqlBuilder {
+func (w *updateBuilder) Where(sql string, value ...interface{}) UpdateBuilder {
+	w.where.Where(sql, value)
+	return w
+}
+
+func (is *updateBuilder) Set(k string, v interface{}) UpdateBuilder {
 	is.Do(func() {
 		is.set = make(map[string]interface{})
 	})
@@ -40,7 +44,7 @@ func (is *updateBuilder) Set(k string, v interface{}) SqlBuilder {
 	return is
 }
 
-func (is *updateBuilder) From(tableName string) SqlBuilder {
+func (is *updateBuilder) From(tableName string) UpdateBuilder {
 	is.tableName = tableName
 	return is
 }
@@ -54,14 +58,19 @@ func (is *updateBuilder) Sql() string {
 		}
 		is.setValues = strings.Join(sets, ",")
 	}
-	return fmt.Sprintf("update from %s set %s where %s", is.tableName, is.setValues, is.whereSql)
+	sql := fmt.Sprintf("update from %s set %s", is.tableName, is.setValues)
+	if !is.where.Empty() {
+		sql += fmt.Sprintf(" where %s", is.where.Sql())
+	}
+	return sql
 }
 
 func (is *updateBuilder) Args() []interface{} {
-	return append(is.args, is.whereArgs...)
+	w := is.where.Args()
+	return append(is.args, w...)
 }
 
-func UpdateFrom(tableName string) SqlBuilder {
+func UpdateFrom(tableName string) UpdateBuilder {
 	return new(updateBuilder).From(tableName)
 }
 
@@ -84,7 +93,7 @@ func StructToWhere(i interface{}) (where string, whereArgs []interface{}) {
 	return
 }
 
-func HalfAutoUpdate(set interface{}, where interface{}) (SqlBuilder, error) {
+func HalfAutoUpdate(set interface{}, where interface{}) (UpdateBuilder, error) {
 	//老样子 先拿表名来生成一个sqlbuilder
 	tName := TableName(set)
 	if len(tName) == 0 {
@@ -116,7 +125,7 @@ func HalfAutoUpdate(set interface{}, where interface{}) (SqlBuilder, error) {
 	return sb, nil
 }
 
-func AutoUpdate(i interface{}) (SqlBuilder, error) {
+func AutoUpdate(i interface{}) (UpdateBuilder, error) {
 	//老样子 先拿表名来生成一个sqlbuilder
 	tName := TableName(i)
 	if len(tName) == 0 {
@@ -126,11 +135,11 @@ func AutoUpdate(i interface{}) (SqlBuilder, error) {
 
 	ic := 0 //有效列计数
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
-		//获取tag，也就是自定义的column
-		column := ColumnName(t)
-		if IsPk(t) {
-			sb.Where(fmt.Sprintf("%s = ?", column), v.Interface())
+		if ws := whereSql(t); len(ws) > 0 {
+			sb.And(ws, v.Interface())
 		} else {
+			//获取tag，也就是自定义的column
+			column := ColumnName(t)
 			// "-" 表示忽略，空数据 也直接跳过
 			if column == "-" || reflectx.IsNull(v) {
 				return nil

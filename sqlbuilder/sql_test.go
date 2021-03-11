@@ -89,15 +89,49 @@ func TestAutoUpdate(t *testing.T) {
 		BbbBb int
 		CccCc float64
 		asda  bool
-		Id    string `pk:"1"`
+		Id    string `dbw:"gt"`
+		Ts    int64  `dbw:"lt"`
 	}
 	s := TestTable{
 		AaaAa: "asdasdasdasdas",
 		BbbBb: 200,
 		CccCc: 3.14,
 		asda:  true,
+		Id:    "10000",
+		Ts:    time.Now().Unix(),
 	}
 	sql, err := AutoUpdate(s)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	} else {
+		t.Log(sql.Sql(), sql.Args())
+	}
+}
+
+type TestSelectTable struct {
+	AaaAa string `db:"a"`
+	BbbBb int
+	CccCc float64
+	asda  bool
+	Id    string `dbw:"gt"`
+	Ts    int64  `dbw:"lt"`
+}
+
+func (TestSelectTable) TableName() string {
+	return "asd"
+}
+func TestAutoSelect(t *testing.T) {
+
+	s := TestSelectTable{
+		AaaAa: "asdasdasdasdas",
+		BbbBb: 200,
+		CccCc: 3.14,
+		asda:  true,
+		Id:    "10000",
+		Ts:    time.Now().Unix(),
+	}
+	sql, err := AutoSelect(s)
 	if err != nil {
 		t.Error(err.Error())
 		return
