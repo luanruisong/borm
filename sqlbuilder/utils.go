@@ -18,15 +18,6 @@ func TableName(i interface{}) string {
 	return tName
 }
 
-func ColumnName(t reflect.StructField) string {
-	column := t.Tag.Get("db")
-	if len(column) == 0 {
-		//入无自定义column，取field名称的蛇形
-		column = stringx.SnakeName(t.Name)
-	}
-	return column
-}
-
 func IsPk(t reflect.StructField) bool {
 	tag := t.Tag.Get("pk")
 	if len(tag) == 0 {

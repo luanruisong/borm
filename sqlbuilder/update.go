@@ -80,7 +80,7 @@ func StructToWhere(i interface{}) (where string, whereArgs []interface{}) {
 	)
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
 		//获取tag，也就是自定义的column
-		column := ColumnName(t)
+		column := reflectx.ColumnName(t)
 		// "-" 表示忽略，空数据 也直接跳过
 		if column == "-" || reflectx.IsNull(v) {
 			return nil
@@ -104,7 +104,7 @@ func HalfAutoUpdate(set interface{}, where interface{}) (UpdateBuilder, error) {
 	ic := 0 //有效列计数
 	_ = reflectx.StructRange(set, func(t reflect.StructField, v reflect.Value) error {
 		//获取tag，也就是自定义的column
-		column := ColumnName(t)
+		column := reflectx.ColumnName(t)
 		// "-" 表示忽略，空数据 也直接跳过
 		if column == "-" || reflectx.IsNull(v) {
 			return nil
@@ -139,7 +139,7 @@ func AutoUpdate(i interface{}) (UpdateBuilder, error) {
 			sb.And(ws, v.Interface())
 		} else {
 			//获取tag，也就是自定义的column
-			column := ColumnName(t)
+			column := reflectx.ColumnName(t)
 			// "-" 表示忽略，空数据 也直接跳过
 			if column == "-" || reflectx.IsNull(v) {
 				return nil

@@ -126,7 +126,7 @@ func whereSql(t reflect.StructField) string {
 	if len(where) == 0 {
 		return ""
 	}
-	column := ColumnName(t)
+	column := reflectx.ColumnName(t)
 	return fmt.Sprintf("%s %s ?", column, whereFlag(where))
 }
 
@@ -156,7 +156,7 @@ func AutoSelect(i interface{}) (Selector, error) {
 			sb.And(ws, v.Interface())
 		} else {
 			//获取tag，也就是自定义的column
-			column := ColumnName(t)
+			column := reflectx.ColumnName(t)
 			// "-" 表示忽略，空数据 也直接跳过
 			if column == "-" || reflectx.IsNull(v) {
 				return nil

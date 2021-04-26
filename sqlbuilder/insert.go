@@ -69,7 +69,7 @@ func AutoInsert(i interface{}) (InsertBuilder, error) {
 	//错误可直接忽略（因为没有产生错误的地方）
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
 		//获取tag，也就是自定义的column
-		column := ColumnName(t)
+		column := reflectx.ColumnName(t)
 		// "-" 表示忽略，空数据 也直接跳过
 		if column == "-" || reflectx.IsNull(v) {
 			return nil

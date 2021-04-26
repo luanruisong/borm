@@ -2,6 +2,8 @@ package reflectx
 
 import (
 	"reflect"
+
+	"github.com/luanruisong/borm/stringx"
 )
 
 //直接获取struct的type
@@ -56,4 +58,22 @@ func IsNull(v reflect.Value) bool {
 		return v.String() == ""
 	}
 	return false
+}
+
+func ColumnName(t reflect.StructField) string {
+	column := t.Tag.Get("db")
+	if len(column) == 0 {
+		//入无自定义column，取field名称的蛇形
+		column = stringx.SnakeName(t.Name)
+	}
+	return column
+}
+
+func StructMap(i interface{}) (res map[string]reflect.Value, err error) {
+	res = make(map[string]reflect.Value)
+	err = StructRange(i, func(t reflect.StructField, v reflect.Value) error {
+		res[ColumnName(t)] = v
+		return nil
+	})
+	return
 }
