@@ -10,4 +10,5 @@ const (
 	ErrNotPtr     = IErr("Arg Must Be Ptr")
 	ErrNotSlice   = IErr("Arg Must Be Slice")
 	ErrNoMoreRows = IErr("No More Rows")
+	ErrTimeScan   = IErr("time scanner failed")
 )

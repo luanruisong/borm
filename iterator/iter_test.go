@@ -19,7 +19,7 @@ type TestStruct struct {
 }
 
 func open() *sql.DB {
-	dsn := "user:pwd@tcp(127.0.0.1:3306)/test?loc=Asia%2FShanghai&charset=utf8mb4"
+	dsn := "stt_weibo:stt_weibo@tcp(172.16.1.112:3306)/test?loc=Asia%2FShanghai&charset=utf8mb4"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
@@ -58,7 +58,7 @@ func TestIterator_All(t *testing.T) {
 func TestIterator_One(t *testing.T) {
 	db := open()
 	defer db.Close()
-	selector := sqlbuilder.SelectFrom("borm_test").Limit(1)
+	selector := sqlbuilder.SelectFrom("test_struct").Limit(1)
 	rows, err := db.Query(selector.Sql(), selector.Args()...)
 	if err != nil {
 		t.Error(err.Error())

@@ -69,10 +69,18 @@ func ColumnName(t reflect.StructField) string {
 	return column
 }
 
-func StructMap(i interface{}) (res map[string]reflect.Value, err error) {
-	res = make(map[string]reflect.Value)
+type Valuex struct {
+	reflect.Value
+	Tag reflect.StructTag
+}
+
+func StructMap(i interface{}) (res map[string]Valuex, err error) {
+	res = make(map[string]Valuex)
 	err = StructRange(i, func(t reflect.StructField, v reflect.Value) error {
-		res[ColumnName(t)] = v
+		res[ColumnName(t)] = Valuex{
+			Value: v,
+			Tag:   t.Tag,
+		}
 		return nil
 	})
 	return

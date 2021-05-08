@@ -25,35 +25,26 @@ func reset(data interface{}) error {
 
 //fetchResult 通过列名抓取响应属性生成一个类型指针
 func fetchResult(rows *sql.Rows, itemT reflect.Type, columns []string) (reflect.Value, error) {
-	var err error
 	objT := reflect.New(itemT)
 	values := make([]interface{}, len(columns))
 	fieldMap, _ := reflectx.StructMap(objT.Interface())
-	tmpMap := make(map[string]reflect.Value)
 	for i, k := range columns {
 		f, ok := fieldMap[k]
 		if !ok {
 			values[i] = new(interface{})
 			continue
 		}
-		values[i] = f.Addr().Interface()
-		if ok {
-			switch values[i].(type) {
-			case time.Time, *time.Time:
-				tmpValue := reflect.New(reflect.TypeOf(""))
-				values[i] = tmpValue.Interface()
-				tmpMap[k] = tmpValue
+		curr := f.Addr().Interface()
+		switch curr.(type) {
+		case time.Time, *time.Time:
+			format := defTimeFormat
+			if dbFmt := f.Tag.Get("fmt"); len(dbFmt) > 0 {
+				format = dbFmt
 			}
+			values[i] = NewTimeScanner(f.Value, format)
+		default:
+			values[i] = curr
 		}
 	}
-	err = rows.Scan(values...)
-	if err == nil {
-		for k, v := range tmpMap {
-			curr := v.Elem().String()
-			t, _ := time.Parse("2006-01-02 15:04:05", curr)
-			currV := reflect.ValueOf(t)
-			fieldMap[k].Set(currV)
-		}
-	}
-	return objT, err
+	return objT, rows.Scan(values...)
 }
