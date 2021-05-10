@@ -33,13 +33,13 @@ func (t TimeScanner) Scan(src interface{}) (err error) {
 	case int64:
 		curr = time.Unix(src.(int64), 0)
 	case nil:
-		return nil
+		return
 	default:
 		return ErrTimeScan
 	}
 	currV := reflect.ValueOf(curr)
 	t.v.Set(currV)
-	return nil
+	return
 }
 
 func NewTimeScanner(v reflect.Value, format string) sql.Scanner {
