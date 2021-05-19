@@ -106,19 +106,23 @@ func SelectFrom(tableName string) Selector {
 	}
 }
 
-func AutoWhere(i interface{}) (where string, whereArgs []interface{}) {
+func Select(c ...string) Selector {
+	sb := &selectBuilder{}
+	sb.Select(c...)
+	return sb
+}
+
+func AutoWhere(i interface{}) whereBuilder {
 	var (
-		whereList []string
+		sb = whereBuilder{}
 	)
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
-		if sql := whereSql(t); len(sql) > 0 {
-			whereList = append(whereList, sql)
-			whereArgs = append(whereArgs, v.Interface())
+		if ws := whereSql(t); len(ws) > 0 {
+			sb.And(ws, []interface{}{v.Interface()})
 		}
 		return nil
 	})
-	where = strings.Join(whereList, " and ")
-	return
+	return sb
 }
 
 func whereSql(t reflect.StructField) string {

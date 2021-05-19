@@ -42,7 +42,7 @@ func TestColumnName(t *testing.T) {
 	}{}
 
 	reflectx.StructRange(s, func(f reflect.StructField, v reflect.Value) error {
-		t.Log(ColumnName(f))
+		t.Log(reflectx.ColumnName(f))
 		return nil
 	})
 

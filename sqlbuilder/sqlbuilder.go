@@ -14,6 +14,7 @@ type (
 		Sql
 		From(tableName string) InsertBuilder
 		Set(key string, value interface{}) InsertBuilder
+		Values(value interface{}) InsertBuilder
 	}
 
 	DeleteBuilder interface {
@@ -30,6 +31,7 @@ type (
 		Set(key string, value interface{}) UpdateBuilder
 		Where(sql string, value ...interface{}) UpdateBuilder
 		And(sql string, value ...interface{}) UpdateBuilder
+		Or(sql string, value ...interface{}) UpdateBuilder
 	}
 
 	Selector interface {

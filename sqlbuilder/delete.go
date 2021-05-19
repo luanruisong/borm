@@ -1,6 +1,9 @@
 package sqlbuilder
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type (
 	deleteBuilder struct {
@@ -43,4 +46,16 @@ func (d *deleteBuilder) From(tableName string) DeleteBuilder {
 
 func DeleteFrom(tableName string) DeleteBuilder {
 	return new(deleteBuilder).From(tableName)
+}
+
+func AutoDelete(i interface{}) (DeleteBuilder, error) {
+	//老样子 先拿表名来生成一个sqlbuilder
+	tName := TableName(i)
+	if len(tName) == 0 {
+		return nil, errors.New("can not find table name")
+	}
+	sb := DeleteFrom(tName)
+	where := AutoWhere(i)
+	sb.Where(where.Sql(), where.Args()...)
+	return sb, nil
 }

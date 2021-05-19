@@ -74,9 +74,9 @@ func TestAutoInsert(t *testing.T) {
 }
 
 func autoInsert(t *testing.T, s interface{}) {
-	sql, err := AutoInsert(s)
-	if err != nil {
-		t.Error(err.Error())
+	sql := AutoInsert(s)
+	if sql == nil {
+		t.Error("nil")
 		return
 	} else {
 		t.Log(sql.Sql(), sql.Args())

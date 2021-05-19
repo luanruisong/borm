@@ -1,7 +1,6 @@
 package sqlbuilder
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -49,22 +48,7 @@ func (is *insertBuilder) Args() []interface{} {
 	return is.args
 }
 
-func InsertInto(tableName string) InsertBuilder {
-	return new(insertBuilder).From(tableName)
-}
-
-//自动插入结构体
-func AutoInsert(i interface{}) (InsertBuilder, error) {
-	//处理tableName 如果实现了table接口，按照接口
-	tName := TableName(i)
-	//如果是匿名struct，无table 返回找不到tableName
-	if len(tName) == 0 {
-		return nil, errors.New("can not find table name")
-	}
-	//初始化一个sqlBuilder
-	sb := InsertInto(tName)
-	//定义一个计数器
-	ic := 0
+func (is *insertBuilder) Values(i interface{}) InsertBuilder {
 	//使用reflectx的range函数，对参结构体进行遍历
 	//错误可直接忽略（因为没有产生错误的地方）
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
@@ -75,13 +59,25 @@ func AutoInsert(i interface{}) (InsertBuilder, error) {
 			return nil
 		}
 		// 书接上回，进行sql构建（单一属性）
-		sb.Set(column, v.Interface())
-		ic++
+		is.Set(column, v.Interface())
 		return nil
 	})
-	//计数器为0表示无可用列构建，返回错误
-	if ic == 0 {
-		return nil, errors.New("no column field to sql")
+	return is
+}
+
+func InsertInto(tableName string) InsertBuilder {
+	return new(insertBuilder).From(tableName)
+}
+
+//自动插入结构体
+func AutoInsert(i interface{}) InsertBuilder {
+	//处理tableName 如果实现了table接口，按照接口
+	tName := TableName(i)
+	//如果是匿名struct，无table 返回找不到tableName
+	if len(tName) == 0 {
+		return nil
 	}
-	return sb, nil
+	//初始化一个sqlBuilder
+	sb := InsertInto(tName).Values(i)
+	return sb
 }
