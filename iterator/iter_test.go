@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	//_ "github.com/go-sql-driver/mysql"
 
 	"github.com/luanruisong/borm/sqlbuilder"
 )
@@ -19,7 +19,7 @@ type TestStruct struct {
 }
 
 func open() *sql.DB {
-	dsn := "stt_weibo:stt_weibo@tcp(172.16.1.112:3306)/test?loc=Asia%2FShanghai&charset=utf8mb4"
+	dsn := "user:root@tcp(127.0.0.1:3306)/test?loc=Asia%2FShanghai&charset=utf8mb4"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
