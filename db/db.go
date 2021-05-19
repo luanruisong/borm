@@ -32,7 +32,7 @@ func (d *dataBase) Select(s ...string) Selector {
 	return NewSelector(d.db, sqlbuilder.Select(s...))
 }
 
-func (d *dataBase) From(s string) Selector {
+func (d *dataBase) SelectFrom(s string) Selector {
 	return NewSelector(d.db, sqlbuilder.SelectFrom(s))
 }
 

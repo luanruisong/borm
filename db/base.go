@@ -54,7 +54,7 @@ type (
 		AutoDelete(i interface{}) (sql.Result, error)
 
 		Select(...string) Selector
-		From(string) Selector
+		SelectFrom(string) Selector
 	}
 )
 
