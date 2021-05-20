@@ -2,8 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"errors"
-	"reflect"
 
 	"github.com/luanruisong/borm/iterator"
 )
@@ -71,11 +69,4 @@ func NewDB(driver, connStr string) (DB, error) {
 		return nil, err
 	}
 	return &dataBase{db: db}, nil
-}
-
-func New(conn Connector) (DB, error) {
-	if conn == nil || reflect.ValueOf(conn).IsNil() {
-		return nil, errors.New("nil connector")
-	}
-	return NewDB(conn.DriverName(), conn.ConnStr())
 }
