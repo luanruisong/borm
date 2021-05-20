@@ -20,6 +20,8 @@ func (t TimeScanner) Scan(src interface{}) (err error) {
 		curr time.Time
 	)
 	switch src.(type) {
+	case time.Time:
+		curr = src.(time.Time)
 	case []byte:
 		curr, err = time.Parse(t.format, string(src.([]byte)))
 		if err != nil {
