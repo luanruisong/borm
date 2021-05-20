@@ -2,8 +2,6 @@ package borm
 
 import (
 	"fmt"
-
-	"github.com/luanruisong/borm/db"
 )
 
 type MySQLConfig struct {
@@ -15,6 +13,14 @@ type MySQLConfig struct {
 	PoolSize int    `yaml:"pool_size" json:"pool_size" xml:"pool_size"`
 	Charset  string `yaml:"charset" json:"charset" xml:"charset"`
 	Loc      string `yaml:"loc" json:"loc" xml:"loc"`
+}
+
+func (mc *MySQLConfig) DriverName() string {
+	return "mysql"
+}
+
+func (mc *MySQLConfig) ConnStr() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true&loc=%s", mc.User, mc.Pwd, mc.Host, mc.defPort(), mc.Db, mc.defCharset(), mc.defLoc())
 }
 
 func (mc *MySQLConfig) defPort() int {
@@ -37,21 +43,10 @@ func (mc *MySQLConfig) defCharset() string {
 	}
 	return mc.Charset
 }
+
 func (mc *MySQLConfig) defLoc() string {
 	if len(mc.Loc) == 0 {
 		mc.Loc = "Asia%2FShanghai"
 	}
 	return mc.Loc
-}
-
-func (mc *MySQLConfig) fmtUrl() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true&loc=%s", mc.User, mc.Pwd, mc.Host, mc.defPort(), mc.Db, mc.defCharset(), mc.defLoc())
-}
-
-func (mc *MySQLConfig) Conn() (db.DB, error) {
-	borm, err := db.NewDB("mysql", mc.fmtUrl())
-	if err == nil {
-		borm.SetMaxOpenConns(mc.defPoolSize())
-	}
-	return borm, err
 }
