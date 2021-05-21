@@ -1,19 +1,22 @@
 package db
 
 import (
-	"database/sql"
-
 	"github.com/luanruisong/borm/iterator"
 	"github.com/luanruisong/borm/sqlbuilder"
 )
 
 type (
 	selector struct {
-		sb sqlbuilder.Selector
-		db *sql.DB
+		sb   sqlbuilder.Selector
+		exec SqlExecutor
 	}
 )
 
+func (s *selector) AutoWhere(i interface{}) Selector {
+	where := sqlbuilder.AutoWhere(i)
+	s.sb.Where(where.Sql(), where.Args()...)
+	return s
+}
 func (s *selector) Where(sql string, value ...interface{}) Selector {
 	s.sb.Where(sql, value...)
 	return s
@@ -60,7 +63,7 @@ func (s *selector) Offset(i int64) Selector {
 }
 
 func (s *selector) All(i interface{}) error {
-	rows, err := s.db.Query(s.sb.Sql(), s.sb.Args()...)
+	rows, err := s.exec.Query(s.sb.Sql(), s.sb.Args()...)
 	if err != nil {
 		return err
 	}
@@ -69,7 +72,7 @@ func (s *selector) All(i interface{}) error {
 }
 
 func (s *selector) One(i interface{}) error {
-	rows, err := s.db.Query(s.sb.Sql(), s.sb.Args()...)
+	rows, err := s.exec.Query(s.sb.Sql(), s.sb.Args()...)
 	if err != nil {
 		return err
 	}
@@ -77,9 +80,9 @@ func (s *selector) One(i interface{}) error {
 	return iter.One(i)
 }
 
-func NewSelector(db *sql.DB, sb sqlbuilder.Selector) Selector {
+func NewSelector(exec SqlExecutor, sb sqlbuilder.Selector) Selector {
 	return &selector{
-		sb: sb,
-		db: db,
+		sb:   sb,
+		exec: exec,
 	}
 }

@@ -48,7 +48,16 @@ func StructRange(i interface{}, handler func(t reflect.StructField, v reflect.Va
 }
 
 //判断某一属性是否为空值
-func IsNull(v reflect.Value) bool {
+func IsNull(i interface{}) bool {
+	var v reflect.Value
+	switch i.(type) {
+	case nil:
+		return true
+	case reflect.Value:
+		v = i.(reflect.Value)
+	default:
+		v = reflect.ValueOf(i)
+	}
 	switch v.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
@@ -56,6 +65,8 @@ func IsNull(v reflect.Value) bool {
 		return v.IsZero()
 	case reflect.String:
 		return v.String() == ""
+	case reflect.Ptr:
+		return v.IsNil()
 	}
 	return false
 }

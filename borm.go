@@ -2,14 +2,18 @@ package borm
 
 import (
 	"errors"
-	"reflect"
 
 	"github.com/luanruisong/borm/db"
+	"github.com/luanruisong/borm/reflectx"
 )
 
 func New(conn db.Connector) (db.DB, error) {
-	if conn == nil || reflect.ValueOf(conn).IsNil() {
+	if reflectx.IsNull(conn) {
 		return nil, errors.New("nil connector")
 	}
-	return db.NewDB(conn.DriverName(), conn.ConnStr())
+	db, err := db.NewDB(conn.DriverName(), conn.ConnStr())
+	if err == nil {
+		db.SetMaxOpenConns(conn.GetPoolSize())
+	}
+	return db, err
 }

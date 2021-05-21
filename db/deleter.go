@@ -8,8 +8,8 @@ import (
 
 type (
 	deleter struct {
-		sb sqlbuilder.DeleteBuilder
-		db *sql.DB
+		sb   sqlbuilder.DeleteBuilder
+		exec SqlExecutor
 	}
 )
 
@@ -30,12 +30,12 @@ func (i *deleter) And(sql string, value ...interface{}) Deleter {
 
 func (i *deleter) Exec() (sql.Result, error) {
 	sb := i.sb
-	return i.db.Exec(sb.Sql(), sb.Args()...)
+	return i.exec.Exec(sb.Sql(), sb.Args()...)
 }
 
-func NewDeleter(db *sql.DB, sb sqlbuilder.DeleteBuilder) Deleter {
+func NewDeleter(exec SqlExecutor, sb sqlbuilder.DeleteBuilder) Deleter {
 	return &deleter{
-		sb: sb,
-		db: db,
+		sb:   sb,
+		exec: exec,
 	}
 }

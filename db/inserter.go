@@ -8,14 +8,14 @@ import (
 
 type (
 	inserter struct {
-		sb sqlbuilder.InsertBuilder
-		db *sql.DB
+		sb   sqlbuilder.InsertBuilder
+		exec SqlExecutor
 	}
 )
 
 func (i *inserter) Exec() (sql.Result, error) {
 	sb := i.sb
-	return i.db.Exec(sb.Sql(), sb.Args()...)
+	return i.exec.Exec(sb.Sql(), sb.Args()...)
 }
 
 func (i *inserter) Values(i2 interface{}) Inserter {
@@ -23,9 +23,9 @@ func (i *inserter) Values(i2 interface{}) Inserter {
 	return i
 }
 
-func NewInserter(db *sql.DB, sb sqlbuilder.InsertBuilder) Inserter {
+func NewInserter(exec SqlExecutor, sb sqlbuilder.InsertBuilder) Inserter {
 	return &inserter{
-		sb: sb,
-		db: db,
+		sb:   sb,
+		exec: exec,
 	}
 }

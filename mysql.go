@@ -30,7 +30,7 @@ func (mc *MySQLConfig) defPort() int {
 	return mc.Port
 }
 
-func (mc *MySQLConfig) defPoolSize() int {
+func (mc *MySQLConfig) GetPoolSize() int {
 	if mc.PoolSize == 0 {
 		mc.PoolSize = 10
 	}

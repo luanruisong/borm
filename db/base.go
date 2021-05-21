@@ -7,30 +7,31 @@ import (
 )
 
 type (
-	Executor interface {
+	BormExecutor interface {
 		Exec() (sql.Result, error)
 	}
 	Updater interface {
-		Executor
+		BormExecutor
 		Set(key string, value interface{}) Updater
 		Where(sql string, value ...interface{}) Updater
 		And(sql string, value ...interface{}) Updater
 		Or(sql string, value ...interface{}) Updater
 	}
 	Deleter interface {
-		Executor
+		BormExecutor
 		Where(sql string, value ...interface{}) Deleter
 		And(sql string, value ...interface{}) Deleter
 		Or(sql string, value ...interface{}) Deleter
 	}
 
 	Inserter interface {
-		Executor
+		BormExecutor
 		Values(interface{}) Inserter
 	}
 	Selector interface {
 		iterator.Iterator
 		Where(sql string, value ...interface{}) Selector
+		AutoWhere(i interface{}) Selector
 		And(sql string, value ...interface{}) Selector
 		Or(sql string, value ...interface{}) Selector
 		From(tableName string) Selector
@@ -40,12 +41,14 @@ type (
 		Limit(int64) Selector
 		Offset(int64) Selector
 	}
-	DB interface {
-		SetMaxOpenConns(n int)
+
+	SqlExecutor interface {
 		Exec(sql string, args ...interface{}) (sql.Result, error)
 		Query(sql string, args ...interface{}) (*sql.Rows, error)
 		QueryRow(sql string, args ...interface{}) *sql.Row
-
+	}
+	Executor interface {
+		SqlExecutor
 		InsertInto(t string) Inserter
 		AutoInsert(t interface{}) (sql.Result, error)
 		UpdateFrom(tableName string) Updater
@@ -55,18 +58,40 @@ type (
 
 		Select(...string) Selector
 		SelectFrom(string) Selector
+
+		Count(i interface{}) (int64, error)
+	}
+
+	DataBase interface {
+		Executor
+		SetMaxOpenConns(n int)
+		Close() error
+
+		Begin() (Tx, error)
+	}
+	Tx interface {
+		Executor
+		Comment() error
+		RollBack() error
 	}
 
 	Connector interface {
 		DriverName() string
 		ConnStr() string
+		GetPoolSize() int
 	}
 )
 
-func NewDB(driver, connStr string) (DB, error) {
+func NewDB(driver, connStr string) (DataBase, error) {
 	db, err := sql.Open(driver, connStr)
 	if err != nil {
 		return nil, err
 	}
-	return &dataBase{db: db}, nil
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+	return &dataBase{
+		executor: newExec(db),
+		db:       db,
+	}, nil
 }

@@ -8,8 +8,8 @@ import (
 
 type (
 	updater struct {
-		sb sqlbuilder.UpdateBuilder
-		db *sql.DB
+		sb   sqlbuilder.UpdateBuilder
+		exec SqlExecutor
 	}
 )
 
@@ -35,12 +35,12 @@ func (i *updater) And(sql string, value ...interface{}) Updater {
 
 func (i *updater) Exec() (sql.Result, error) {
 	sb := i.sb
-	return i.db.Exec(sb.Sql(), sb.Args()...)
+	return i.exec.Exec(sb.Sql(), sb.Args()...)
 }
 
-func NewUpdate(db *sql.DB, sb sqlbuilder.UpdateBuilder) Updater {
+func NewUpdate(exec SqlExecutor, sb sqlbuilder.UpdateBuilder) Updater {
 	return &updater{
-		sb: sb,
-		db: db,
+		sb:   sb,
+		exec: exec,
 	}
 }
