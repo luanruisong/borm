@@ -7,7 +7,7 @@ import (
 	"github.com/luanruisong/borm/reflectx"
 )
 
-func New(conn db.Connector) (db.DB, error) {
+func New(conn db.Connector) (db.DataBase, error) {
 	if reflectx.IsNull(conn) {
 		return nil, errors.New("nil connector")
 	}
