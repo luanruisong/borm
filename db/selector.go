@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/luanruisong/borm/iterator"
+	"github.com/luanruisong/borm/reflectx"
 	"github.com/luanruisong/borm/sqlbuilder"
 )
 
@@ -13,8 +14,10 @@ type (
 )
 
 func (s *selector) AutoWhere(i interface{}) Selector {
-	where := sqlbuilder.AutoWhere(i)
-	s.sb.Where(where.Sql(), where.Args()...)
+	if !reflectx.IsNull(i) {
+		where := sqlbuilder.AutoWhere(i)
+		s.sb.Where(where.Sql(), where.Args()...)
+	}
 	return s
 }
 func (s *selector) Where(sql string, value ...interface{}) Selector {
