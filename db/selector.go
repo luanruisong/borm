@@ -15,8 +15,9 @@ type (
 
 func (s *selector) AutoWhere(i interface{}) Selector {
 	if !reflectx.IsNull(i) {
-		where := sqlbuilder.AutoWhere(i)
-		s.sb.Where(where.Sql(), where.Args()...)
+		if where := sqlbuilder.AutoWhere(i); where != nil {
+			s.sb.Where(where.Sql(), where.Args()...)
+		}
 	}
 	return s
 }

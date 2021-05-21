@@ -55,7 +55,8 @@ func AutoDelete(i interface{}) (DeleteBuilder, error) {
 		return nil, errors.New("can not find table name")
 	}
 	sb := DeleteFrom(tName)
-	where := AutoWhere(i)
-	sb.Where(where.Sql(), where.Args()...)
+	if where := AutoWhere(i); where != nil {
+		sb.Where(where.Sql(), where.Args()...)
+	}
 	return sb, nil
 }

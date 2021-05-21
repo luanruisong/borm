@@ -112,16 +112,21 @@ func Select(c ...string) Selector {
 	return sb
 }
 
-func AutoWhere(i interface{}) whereBuilder {
+func AutoWhere(i interface{}) *whereBuilder {
 	var (
-		sb = whereBuilder{}
+		sb = &whereBuilder{}
+		c  = 0
 	)
 	_ = reflectx.StructRange(i, func(t reflect.StructField, v reflect.Value) error {
 		if ws := whereSql(t); len(ws) > 0 {
 			sb.And(ws, []interface{}{v.Interface()})
+			c++
 		}
 		return nil
 	})
+	if c == 0 {
+		return nil
+	}
 	return sb
 }
 
