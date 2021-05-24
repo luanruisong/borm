@@ -76,7 +76,8 @@ func (s *selector) All(i interface{}) error {
 }
 
 func (s *selector) One(i interface{}) error {
-	rows, err := s.exec.Query(s.sb.Sql(), s.sb.Args()...)
+	sb := s.sb.Limit(1)
+	rows, err := s.exec.Query(sb.Sql(), sb.Args()...)
 	if err != nil {
 		return err
 	}
