@@ -54,6 +54,7 @@ func (ite *iterator) All(dst interface{}) error {
 		}
 	}
 	dstv.Elem().Set(slicev)
+	rows.Close()
 	return rows.Err()
 }
 
@@ -83,6 +84,7 @@ func (ite *iterator) One(dst interface{}) error {
 	} else {
 		itemV.Set(reflect.Indirect(item))
 	}
+	rows.Close()
 	return rows.Err()
 
 }
